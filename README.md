@@ -29,16 +29,36 @@ Every column in the SELECT list must be either:
    Type-3 doesn't work as Error: employee_name is not in GROUP BY or aggregate.
 
 ## Window Functions
-1. Row_number: It never skips a number, even if there is a tie. (1,2,3)
-2. RANK: This function gives tied rows the same rank, but then skips the next rank number. (1,1,3) - Skipped 2
-3. DENSE_RANK: This function gives tied rows the same rank, but it does not skip the next rank number. (1,1,2) - No skip 2
+1. **Row_number**: It never skips a number, even if there is a tie. (1,2,3)
+2. **RANK**: This function gives tied rows the same rank, but then skips the next rank number. (1,1,3) - Skipped 2
+3. **DENSE_RANK**: This function gives tied rows the same rank, but it does not skip the next rank number. (1,1,2) - No skip 2
 
-### Syntax:
-  -- <function_name>() OVER (PARTITION BY column_name ORDER BY column_name)
+#### Syntax: <function_name>() OVER (PARTITION BY column_name ORDER BY column_name)
   
-  -- Partition By: Divide the result set into smaller groups (partitions), and then apply the window function independently inside each group.
+  -- **Partition By**: Divide the result set into smaller groups (partitions), and then apply the window function independently inside each group.
+  
+  -- **function_name**: any aggregate (sum, count, min, max, avg) or analytic function (row_number, lag, lead, rank) that works “over a window” of rows.
 
-Case 1: With PARTITION BY department
+### Example for aggregate function using window function:
+SELECT
+    Employee,
+    Department,
+    Salary,
+    AVG(Salary) OVER (PARTITION BY Department) AS Avg_Dept_Salary
+FROM
+    employees;
+
+
+| Employee | Department  |  Salary | Avg_Dept_Salary |
+| -------- | ----------- | ------: | ---------------:|
+| Alice    | Marketing   |  60000  |         70000   |
+| Bob      | Marketing   |  80000  |          70000  |
+| Charlie  | Engineering | 120000  |        110000   |
+| David    | Engineering | 100000  |         110000  |
+
+
+**Case 1: With PARTITION BY department**
+
 SELECT 
   name, department, salary,
   ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rank_in_dept
@@ -54,7 +74,8 @@ FROM employees;
 | Frank   | Sales      |  71000 |            2 |
 
 
-Case 2: Without PARTITION BY
+**Case 2: Without PARTITION BY**
+
 SELECT 
   name, department, salary,
   ROW_NUMBER() OVER (ORDER BY salary DESC) AS overall_rank
@@ -70,13 +91,10 @@ FROM employees;
 | Bob     | HR         |  55000 |            6 |
 
 ## Ntile:
-
-Synatx:
-NTILE(n) OVER (PARTITION BY column ORDER BY column)
-
-1. n → Number of groups/buckets you want.
-2. PARTITION BY → Optional, divides data into groups before applying NTILE.
-3. ORDER BY → Required; defines how the rows are distributed into buckets.
+#### Synatx: NTILE (n) OVER (PARTITION BY column ORDER BY column)
+1. **n** → Number of groups/buckets you want.
+2. **PARTITION BY** → Optional, divides data into groups before applying NTILE.
+3. **ORDER BY** → Required; defines how the rows are distributed into buckets.
 
 
 
