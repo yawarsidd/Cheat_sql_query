@@ -570,6 +570,64 @@ WHERE rank_in_dept = 1;
 
 ## Common Questions in Interview
 
+Q1: Find employees who earn more than the company average.
+
+SELECT name, salary FROM employees WHERE salary > (SELECT AVG(salary) FROM employees);
+
+| name    | salary |
+| ------- | -----: |
+| Alice   |  70000 |
+| Charlie |  65000 |
+| Emma    |  80000 |
+| Frank   |  65000 |
+| Grace   |  72000 |
+| Hannah  |  70000 |
+
+Q2: For each department, find the employee(s) with the highest salary.
+
+SELECT name, dept_id, salary FROM (SELECT name, dept_id, salary, RANK() OVER(PARTITION BY dept_id ORDER BY salary DESC) AS rnk FROM employees) t 
+
+WHERE rnk = 1;
+
+| name    | dept_id | salary |
+| ------- | ------: | -----: |
+| Alice   |      10 |  70000 |
+| Charlie |      20 |  65000 |
+| Emma    |      30 |  80000 |
+| Frank   |      20 |  65000 |
+| Hannah  |      10 |  70000 |
+
+Q3: Find the second highest salary in the company.
+
+Select max(salary) from employees where salary < (select max(salary) from employees)
+
+| metric         | value |
+| -------------- | -----: |
+| second_highest |  70000 |
+
+
+Q4. How do you find the nth highest salary (say, 2nd highest)?
+
+Method 1 — Using LIMIT and OFFSET:
+
+SELECT DISTINCT salary
+FROM employees
+ORDER BY salary DESC
+LIMIT 1 OFFSET 1;
+
+Method 2 — Using Window Function:
+
+SELECT name, salary
+
+FROM (
+    SELECT name, salary, DENSE_RANK() OVER(ORDER BY salary DESC) AS rnk
+    FROM employees
+) t
+
+WHERE rnk = 2;
+
+
+
 
 
 
